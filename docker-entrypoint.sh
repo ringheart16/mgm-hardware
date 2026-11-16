@@ -26,14 +26,23 @@ if [ ! -f /var/www/html/backend/.env ]; then
     sed -i 's/^LOG_CHANNEL=.*/LOG_CHANNEL=stderr/' /var/www/html/backend/.env
 fi
 
-# Ensure storage directories exist with correct permissions
+# Ensure storage and database directories exist with correct permissions
 mkdir -p /var/www/html/backend/storage/framework/sessions
 mkdir -p /var/www/html/backend/storage/framework/views
 mkdir -p /var/www/html/backend/storage/framework/cache/data
 mkdir -p /var/www/html/backend/storage/logs
 mkdir -p /var/www/html/backend/bootstrap/cache
-chown -R www-data:www-data /var/www/html/backend/storage /var/www/html/backend/bootstrap/cache
-chmod -R 775 /var/www/html/backend/storage /var/www/html/backend/bootstrap/cache
+mkdir -p /var/www/html/backend/database
+chown -R www-data:www-data /var/www/html/backend/storage /var/www/html/backend/bootstrap/cache /var/www/html/backend/database
+chmod -R 775 /var/www/html/backend/storage /var/www/html/backend/bootstrap/cache /var/www/html/backend/database
+
+# Setup SQLite if using sqlite or no database URL is set
+if [ "$DB_CONNECTION" = "sqlite" ] || [ -z "$DATABASE_URL" ]; then
+    export DB_CONNECTION=sqlite
+    touch /var/www/html/backend/database/database.sqlite
+    chown www-data:www-data /var/www/html/backend/database/database.sqlite
+    chmod 664 /var/www/html/backend/database/database.sqlite
+fi
 
 # Generate APP_KEY if empty
 if [ -z "$APP_KEY" ]; then
