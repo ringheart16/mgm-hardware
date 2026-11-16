@@ -19,7 +19,10 @@ return [
         'http://localhost:3000',
     ]),
 
-    'allowed_origins_patterns' => ['*.up.railway.app'],
+    'allowed_origins_patterns' => [
+        '/^https?:\/\/.*\.up\.railway\.app$/',
+        '/^https?:\/\/.*\.onrender\.com$/',
+    ],
 
     'allowed_headers' => ['*'],
 

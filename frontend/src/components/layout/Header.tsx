@@ -1,8 +1,9 @@
 import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
+import { usePWA } from '../../hooks/usePWA';
 import { useNavigate, Link } from 'react-router-dom';
-import { Menu, LogOut, ShoppingCart, User, ShieldCheck } from 'lucide-react';
+import { Menu, LogOut, ShoppingCart, User, ShieldCheck, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface HeaderProps {
@@ -12,6 +13,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   const { user, isAdmin, logout } = useAuth();
   const { totalItems } = useCart();
+  const { isInstallable, installApp } = usePWA();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -50,6 +52,18 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
 
       {/* Right: Actions */}
       <div className="flex items-center gap-2 sm:gap-3">
+        {/* PWA Install Button */}
+        {isInstallable && (
+          <button
+            onClick={installApp}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-xs font-semibold text-amber-400 transition-colors animate-pulse"
+            title="Install App"
+          >
+            <Download className="w-4 h-4" />
+            <span className="hidden sm:inline">Install App</span>
+          </button>
+        )}
+
         {/* Cart / POS Quick Link */}
         <Link
           to={posPath}

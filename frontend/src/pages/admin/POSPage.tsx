@@ -23,6 +23,7 @@ import {
   Banknote,
   Building,
   UserPlus,
+  ChevronRight,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -63,6 +64,9 @@ export const POSPage: React.FC = () => {
 
   // Receipt Modal
   const [completedSale, setCompletedSale] = useState<Sale | null>(null);
+
+  // Mobile View Tab
+  const [mobileTab, setMobileTab] = useState<'catalog' | 'cart'>('catalog');
 
   useEffect(() => {
     loadPOSData();
@@ -182,9 +186,56 @@ export const POSPage: React.FC = () => {
   const changeDue = Math.max(0, (parseFloat(amountPaid) || 0) - totalAmount);
 
   return (
-    <div className="h-[calc(100vh-6rem)] flex flex-col lg:flex-row gap-5 -m-2 sm:-m-4">
+    <div className="h-[calc(100vh-6rem)] flex flex-col lg:flex-row gap-4 -m-2 sm:-m-4">
+      {/* Mobile Tab Switcher */}
+      <div className="flex lg:hidden bg-slate-900/90 p-1 rounded-2xl border border-slate-800 shrink-0 gap-1 shadow-sm">
+        <button
+          type="button"
+          onClick={() => setMobileTab('catalog')}
+          className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
+            mobileTab === 'catalog'
+              ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <Receipt className="w-3.5 h-3.5" />
+          <span>Products</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-950/20 font-bold">
+            {filteredProducts.length}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setMobileTab('cart')}
+          className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
+            mobileTab === 'cart'
+              ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <ShoppingCart className="w-3.5 h-3.5" />
+          <span>Cart</span>
+          {totalItems > 0 && (
+            <span
+              className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                mobileTab === 'cart'
+                  ? 'bg-slate-950 text-amber-400'
+                  : 'bg-amber-500 text-slate-950'
+              }`}
+            >
+              {totalItems}
+            </span>
+          )}
+        </button>
+      </div>
+
       {/* Left: Product Catalog & Search */}
-      <div className="flex-1 flex flex-col bg-slate-900/60 border border-slate-800/80 rounded-2xl overflow-hidden shadow-sm">
+      <div
+        className={`flex-1 flex-col bg-slate-900/60 border border-slate-800/80 rounded-2xl overflow-hidden shadow-sm ${
+          mobileTab === 'cart' ? 'hidden lg:flex' : 'flex'
+        }`}
+      >
         {/* Top Controls: Search & Category Tabs */}
         <div className="p-4 border-b border-slate-800 bg-slate-900/80 space-y-3">
           <div className="flex items-center gap-3">
@@ -301,27 +352,68 @@ export const POSPage: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Mobile Quick Cart Footer */}
+        {items.length > 0 && (
+          <div className="lg:hidden p-3 bg-slate-950/95 border-t border-slate-800 flex items-center justify-between gap-3 shrink-0">
+            <div>
+              <p className="text-[11px] text-slate-400">
+                {totalItems} item{totalItems > 1 ? 's' : ''} in cart
+              </p>
+              <p className="text-sm font-bold text-amber-400">{formatCurrency(totalAmount)}</p>
+            </div>
+            <Button
+              variant="primary"
+              size="sm"
+              icon={<ShoppingCart className="w-4 h-4" />}
+              onClick={() => setMobileTab('cart')}
+            >
+              View Cart & Checkout
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Right: POS Cart & Checkout Bar */}
-      <div className="w-full lg:w-96 bg-slate-900 border border-slate-800/80 rounded-2xl flex flex-col overflow-hidden shadow-xl shrink-0">
+      <div
+        className={`w-full lg:w-96 bg-slate-900 border border-slate-800/80 rounded-2xl flex-col overflow-hidden shadow-xl shrink-0 ${
+          mobileTab === 'catalog' ? 'hidden lg:flex' : 'flex'
+        }`}
+      >
         {/* Cart Header */}
         <div className="p-4 border-b border-slate-800 bg-slate-950/60 flex items-center justify-between">
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setMobileTab('catalog')}
+              className="lg:hidden p-1.5 -ml-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+              title="Back to Catalog"
+            >
+              <ChevronRight className="w-4 h-4 rotate-180" />
+            </button>
             <ShoppingCart className="w-5 h-5 text-amber-400" />
             <div>
               <h3 className="text-sm font-bold text-slate-100">Current Order</h3>
               <p className="text-[11px] text-slate-400">{totalItems} items in cart</p>
             </div>
           </div>
-          {items.length > 0 && (
+          <div className="flex items-center gap-2">
             <button
-              onClick={clearCart}
-              className="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1"
+              type="button"
+              onClick={() => setMobileTab('catalog')}
+              className="lg:hidden text-xs text-amber-400 hover:text-amber-300 font-medium"
             >
-              <Trash2 className="w-3.5 h-3.5" /> Clear
+              + Items
             </button>
-          )}
+            {items.length > 0 && (
+              <button
+                onClick={clearCart}
+                className="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1"
+              >
+                <Trash2 className="w-3.5 h-3.5" /> Clear
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Customer Selector */}

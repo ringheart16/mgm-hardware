@@ -21,10 +21,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
+    libpq-dev \
     default-mysql-client \
     && docker-php-ext-install -j$(nproc) \
         pdo \
         pdo_mysql \
+        pdo_pgsql \
         mbstring \
         zip \
         bcmath \
@@ -39,6 +41,12 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/backend/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
     && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# Allow Laravel's public/.htaccess rewrite rules (required for API + SPA routing)
+RUN printf '<Directory /var/www/html/backend/public>\n    AllowOverride All\n</Directory>\n' >> /etc/apache2/apache2.conf
+
+# Correct MIME type for the PWA manifest
+RUN echo 'AddType application/manifest+json .webmanifest' >> /etc/apache2/mods-enabled/mime.conf
 
 WORKDIR /var/www/html/backend
 

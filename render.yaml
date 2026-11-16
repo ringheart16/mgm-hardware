@@ -1,0 +1,52 @@
+# Render Blueprint for MGM Hardware Management System
+# Deploys the Laravel API + React frontend (single container) and a PostgreSQL database.
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: mgm-hardware
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: APP_NAME
+        value: MGM Hardware
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_URL
+        fromService:
+          type: web
+          name: mgm-hardware
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: info
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mgm-hardware-db
+          property: connectionString
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: BCRYPT_ROUNDS
+        value: "12"
+
+databases:
+  - name: mgm-hardware-db
+    databaseName: mgm_hardware_db
+    user: mgm_admin
+    plan: free
+    region: singapore

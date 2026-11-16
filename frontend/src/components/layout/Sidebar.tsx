@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { usePWA } from '../../hooks/usePWA';
 import {
   LayoutDashboard,
   Package,
@@ -18,6 +19,7 @@ import {
   User,
   Wrench,
   ChevronRight,
+  Download,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -27,6 +29,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { user, isAdmin } = useAuth();
+  const { isInstallable, installApp } = usePWA();
 
   const adminLinks = [
     { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -146,7 +149,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="p-3 border-t border-slate-800/80 text-center">
+        <div className="p-3 border-t border-slate-800/80 space-y-2 text-center">
+          {isInstallable && (
+            <button
+              onClick={installApp}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 transition-all"
+            >
+              <Download className="w-4 h-4" />
+              <span>Install Mobile App</span>
+            </button>
+          )}
           <p className="text-[10px] text-slate-500">MGM Hardware Supplies v1.0</p>
         </div>
       </aside>
